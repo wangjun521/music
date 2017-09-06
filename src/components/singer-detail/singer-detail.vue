@@ -41,6 +41,8 @@
           if (res.code === ERR_OK) {
             this.songs = this._normallizeSongs(res.data.list)
           }
+        }).catch((err) => {
+          console.log(err)
         })
       },
       _normallizeSongs(list) {
@@ -69,5 +71,3 @@
     -webkit-transform translate3d(100%, 0, 0)
     transform translate3d(100%, 0, 0)
 </style>
-
-
