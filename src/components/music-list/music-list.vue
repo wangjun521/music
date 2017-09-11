@@ -80,7 +80,7 @@
         let zIndex = 0
         let scale = 1
         let blur = 0
-        this.$refs.layer.style[transform] = `translate3d(0,${translateY}px,0)`
+        this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`
         const percent = Math.abs(newY / this.imageHeight)
         if (newY > 0) {
           scale = 1 + percent
