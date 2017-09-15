@@ -17,7 +17,10 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle"v-html="currentSong.singer"></h2>
         </div>
-        <div class="middle">
+        <div class="middle"
+        @touchstart.prevent="middleTouchStart"
+        @touchmove.prevent="middleTouchMove"
+        @touchend="middleTouchEnd">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
@@ -25,34 +28,50 @@
               </div>
             </div>
           </div>
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricLine"
+                  class="text"
+                  :class="{'current': currentLineNum === index}"
+                    v-for="(line, index) in currentLyric.lines">
+                      {{line.txt}}
+                </p>
+              </div>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
-        <div class="progress-wrapper">
-          <span class="time time-l">{{format(currentTime)}}</span>
-          <div class="progress-bar-wrapper">
-            <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
+          <div class="dot-wrapper">
+            <span class="dot" :class="{'active': currentShow === 'cd'}"></span>
+            <span class="dot" :class="{'active': currentShow === 'lyric'}"></span>
           </div>
-          <span class="time time-r">{{format(currentSong.duration)}}</span>
-        </div>
-        <div class="operators">
-          <div class="icon i-left" @click="changeMode">
-            <i :class="iconMode"></i>
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
+            </div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
-          <div class="icon i-left" :class="disableCls">
-            <i class="icon-prev" @click="prev"></i>
-          </div>
-          <div class="icon i-center" :class="disableCls">
-            <i :class="playIcon" @click="togglePlaying"></i>
-          </div>
-          <div class="icon i-right" :class="disableCls">
-            <i class="icon-next" @click="next"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon icon-not-favorite"></i>
+          <div class="operators">
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
+            </div>
+            <div class="icon i-left" :class="disableCls">
+              <i class="icon-prev" @click="prev"></i>
+            </div>
+            <div class="icon i-center" :class="disableCls">
+              <i :class="playIcon" @click="togglePlaying"></i>
+            </div>
+            <div class="icon i-right" :class="disableCls">
+              <i class="icon-next" @click="next"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon icon-not-favorite"></i>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </transition>
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
@@ -85,6 +104,8 @@ import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 
 const transform = prefixStyle('transform')
 export default {
@@ -92,8 +113,14 @@ export default {
     return {
       songReady: false,
       currentTime: 0,
-      radius: 32
+      radius: 32,
+      currentLyric: null,
+      currentLineNum: 0,
+      currentShow: 'cd'
     }
+  },
+  created() {
+    this.touch = {}
   },
   computed: {
     cdCls() {
@@ -249,6 +276,47 @@ export default {
       this._resetCurrentIndex(list)
       this.setPlayList(list)
     },
+    getLyric() {
+      this.currentSong.getLyric().then((lyric) => {
+        this.currentLyric = new Lyric(lyric, this.handleLyric)
+        if (this.playing) {
+          this.currentLyric.play()
+        }
+        console.log(this.currentLyric)
+      })
+    },
+    handleLyric({lineNum, txt}) {
+      this.currentLineNum = lineNum
+      if (lineNum > 5) {
+        let lineEL = this.$refs.lyricLine[lineNum - 5]
+        this.$refs.lyricList.scrollToElement(lineEL, 1000)
+      } else {
+        this.$refs.lyricList.scrollToElement(0, 0, 1000)
+      }
+    },
+    middleTouchStart(e) {
+      this.touch.initiated = true
+      const touch = e.touches[0]
+      this.touch.startX = touch.pageX
+      this.touch.startY = touch.pageY
+    },
+    middleTouchMove(e) {
+      if (!this.touch.initiated) {
+        return
+      }
+      const touch = e.touches[0]
+      const deltaX = touch.pageX - this.touch.startX
+      const deltaY = touch.pageY - this.touch.startY
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return
+      }
+      const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
+      const width = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+      this.$refs.lyricList.$el.style[transform] = `translate3d(${width}px, 0, 0)`
+    },
+    middleTouchEnd() {
+
+    },
     _resetCurrentIndex(list) {
       let index = list.findIndex((item) => {
         return item.id === this.currentSong.id
@@ -293,7 +361,7 @@ export default {
       }
       this.$nextTick(() => {
         this.$refs.audio.play()
-        this.currentSong.getLyric()
+        this.getLyric()
       })
     },
     playing(newPlaying) {
@@ -305,7 +373,8 @@ export default {
   },
   components: {
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Scroll
   }
 }
 </script>
