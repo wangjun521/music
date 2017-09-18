@@ -91,6 +91,12 @@
         let anchorIndex = parseInt(this.touch.anchorIndex) + delta
         this._scrollTo(anchorIndex)
       },
+      refresh() {
+        this.$refs.listview.refresh()
+      },
+      scroll(pos) {
+        this.scrollY = pos.y
+      },
       _scrollTo(index) {
         if (!index && index !== 0) {
           return
@@ -102,9 +108,6 @@
         }
         this.scrollY = -this.listHeight[index]
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
-      },
-      scroll(pos) {
-        this.scrollY = pos.y
       },
       _calculateHeight() {
         this.listHeight = []
