@@ -70,3 +70,7 @@ export const insertSong = function({commit, state}, song) {
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING_STATE, true)
 }
+
+export const saveSearchHistroy = function({commit, state}, query) {
+
+}
