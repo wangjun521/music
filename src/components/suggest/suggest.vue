@@ -87,7 +87,7 @@ export default {
         this.insertSong(item)
       }
       // 当选择了搜索结果时,派发事件,让存进搜索历史中
-      this.$emit('select')
+      this.$emit('select', item)
     },
     listScroll() {
       this.$emit('listScroll')
