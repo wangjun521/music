@@ -92,6 +92,9 @@ export default {
     listScroll() {
       this.$emit('listScroll')
     },
+    refresh() {
+      this.$refs.suggess.refresh()
+    },
     _normallizeSongs(list) {
       let ret = []
       list.forEach((musicdata) => {
