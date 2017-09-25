@@ -64,11 +64,13 @@
     },
     methods: {
       handlePlaylist(playlist) {
-        const bottom = playlist.length > 0 ? '60px' : ''
-        this.$refs.searchResult.style.bottom = bottom
-        this.$refs.shortcutWrapper.style.bottom = bottom
-        this.$refs.shortCut.refresh()
-        this.$refs.suggest.refresh()
+        if (this.query) {
+          const bottom = playlist.length > 0 ? '60px' : ''
+          this.$refs.searchResult.style.bottom = bottom
+          this.$refs.shortcutWrapper.style.bottom = bottom
+          this.$refs.shortCut.refresh()
+          this.$refs.suggest.refresh()
+        }
       },
       addQuery(query) {
         this.$refs.searchBox.setQuery(query)
