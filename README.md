@@ -1,21 +1,14 @@
-# music
+## 根据慕课网视频教程
 
-> A Vue.js project
-
-## Build Setup
-
-``` bash
-# install dependencies
+# 项目运行流程 下载后打开控制台 安装依赖
 npm install
 
-# serve with hot reload at localhost:8080
+# 本地运行
 npm run dev
 
-# build for production with minification
+# 项目打包
 npm run build
 
-# build for production and view the bundle analyzer report
+# 查看打包分析
 npm run build --report
 ```
-
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
