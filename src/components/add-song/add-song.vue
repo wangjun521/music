@@ -13,12 +13,12 @@
       <div class="shortcut" v-show="!query">
         <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <scroll v-if="currentIndex === 0" :data="playHistory" class="list-scroll" ref="songList">
+          <scroll v-if="currentIndex === 0" :data="playHistory" class="list-scroll" ref="songList" :refreshDelay="refreshDelay">
             <div class="list-inner">
               <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
           </scroll >
-          <scroll class="list-scroll" v-if="currentIndex === 1" :data="searchHistory" ref="searchList">
+          <scroll class="list-scroll" v-if="currentIndex === 1" :data="searchHistory" ref="searchList" :refreshDelay="refreshDelay">
             <div class="list-inner">
               <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
             </div>
@@ -28,6 +28,12 @@
       <div class="search-result" v-show="query">
         <suggest  :query="query" :showSinger="showSinger" @select="selectSuggest"></suggest>
       </div>
+      <top-tip ref="TopTip">
+        <div class="tip-title">
+          <i class="icon-ok"></i>
+          <span class="text">-首歌曲已添加到播放列表</span>
+        </div>
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -42,6 +48,7 @@ import {mapGetters, mapActions} from 'vuex'
 import SongList from 'base/song-list/song-list'
 import SearchList from 'base/search-list/search-list'
 import Song from 'common/js/song'
+import TopTip from 'base/top-tip/top-tip'
 export default {
   mixins: [searchMixin],
   data() {
@@ -79,6 +86,7 @@ export default {
     },
     selectSuggest() {
       this.saveSearchHistory()
+      this.showTip()
     },
     switchItem(index) {
       this.currentIndex = index
@@ -87,6 +95,10 @@ export default {
       if (index !== 0) {
         this.insertSong(new Song(song))
       }
+      this.showTip()
+    },
+    showTip() {
+      this.$refs.TopTip.show()
     },
     ...mapActions([
       'insertSong'
@@ -98,7 +110,8 @@ export default {
     Switches,
     Scroll,
     SongList,
-    SearchList
+    SearchList,
+    TopTip
   }
 }
 </script>
